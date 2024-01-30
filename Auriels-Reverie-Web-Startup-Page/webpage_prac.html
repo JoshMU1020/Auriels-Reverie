@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<HTML>
+    <head>
+        <title>My HTML Document</title>
+        <link rel="stylesheet" href="style_prac.css">
+    </head>
+
+    <body>
+        <header>
+            <h1 style="color: #5c386d;">Auriel's Reverie Startup Page:</h1>
+        </header>
+
+        <div class="img">
+            <img src="images\aur_web_start.png" alt="Image-Placeholder">
+        </div>
+        
+        <div class="intro">
+            <h2 style="color: #5c386d;">Welcome to the "Auriel's Reverie" website!</h2>
+            <p>
+                This site is ment to introduce the game concept of Auriel's Reverie.
+            </p>
+
+            <p>
+                In this 2D action-adventure platformer, you play as Auriel, an artist
+                who has been going through a bit of an art block recently. After an exhausting night still 
+                unable to successfully complete a painting, Auriel ends up passing out 
+                at her desk only to find herself stuck in a dream world. This dream world
+                seems to be made of Auriel's art pieces and they don't seem to be very happy 
+                with her! 
+            </p>
+
+            <p>
+                Embark on a journey to traverse Aruiel's mind as she tries to escape her 
+                past creations, all while rediscovering why she became an artist in the first place!
+            </p>
+        </div>
+
+        <div class="form">
+            <form id="userForm">
+                <label for="input1">Enter Name:</label>
+                <input type="text" id="input1" name="input1">
+            
+                <label for="input2">Enter Age:</label>
+                <input type="number" id="input2" name="input2">
+            
+                <label for="input3">Are You Excided To See This Game Exist?</label>
+                <input type="checkbox" id="input3" name="input3">
+            </form>
+        </div>
+
+        <div class="button">
+            <button type="submit" onclick="submitForm()" class="accept-button">Accept</button>
+            <button type="button" onclick="resetForm()" class="cancel-button">Cancel</button>
+        </div>
+
+        <div id="outputMessage"></div>
+
+        <footer>
+            <p>&copy; 2024 Auriel's Reverie</p>
+        </footer>
+
+        <script>
+            function submitForm() {
+                console.log("Submit button pressed!");
+                var nameInput = document.getElementById("input1").value;
+                var ageInput = document.getElementById("input2").value;
+                var checkBoxChecked = document.getElementById("input3").checked;
+    
+                var outputMessage = "";
+    
+                if (nameInput === "" || ageInput === "") {
+                    outputMessage = "Please enter a name and age before pressing accept.";
+                } else {
+                    outputMessage = "Hello " + nameInput + ", my name is Auriel! You are " + ageInput + " years old huh. ";
+    
+                    if (checkBoxChecked) {
+                        outputMessage += "Well, I'm glad you are excited to play my game!";
+                    } else {
+                        outputMessage += "If you ever feel excited to play my game in the future, then let me know!";
+                    }
+                }
+    
+                document.getElementById("outputMessage").innerText = outputMessage;
+            }
+    
+            function resetForm() {
+                console.log("Cancel button pressed!");
+                var formElement = document.getElementById("userForm");
+                console.log("Form Element:", formElement);
+                formElement.reset();
+                console.log("Form Reset Complete");
+                document.getElementById("outputMessage").innerText = "";
+            }
+        </script>
+
+    </body>
+</HTML>

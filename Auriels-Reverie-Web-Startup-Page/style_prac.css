@@ -1,0 +1,85 @@
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: rgba(175, 133, 180, 1);
+    margin: 0px;
+    padding: 0px;
+}
+
+header {
+    background-color: rgba(175, 133, 180, 1);
+    padding: 0px;
+    text-align: center;
+}
+
+h1 {
+    color: #5c386d;
+}
+
+div.img {
+    display: block;
+    text-align: center;
+}
+
+div.intro {
+    display: block;
+    text-align: center;
+    padding-left: 40px;
+    padding-right: 40px; 
+}
+
+div.form {
+    display: block;
+    text-align: center;
+}
+
+form {
+    margin-top: 10px;
+    padding: 0px;
+    background-color: rgba(175, 133, 180, 1);
+    display: inline-block;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #000000;
+}
+
+input, button {
+    display: block;
+    margin-bottom: 10px;
+}
+
+div.button {
+    display: block;
+    text-align: center;
+}
+
+.accept-button {
+    background-color: #27ae60;
+    color: #fff;
+    display: inline-block;
+}
+
+.cancel-button {
+    background-color: #e74c3c;
+    color: #fff;
+    display: inline-block;
+}
+
+#outputMessage {
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+footer {
+    margin-top: 20px;
+    background-color: #906dad;
+    color: #fff;
+    padding: 10px;
+    text-align: center;
+}
