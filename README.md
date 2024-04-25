@@ -1,7 +1,5 @@
 # AURIEL’S REVERIE: GAME CONCEPT
 
-![Web front](images/aur_web_start.png)
-
 ## Introduction:
 The concept of “Auriel’s Reverie” is that of a 2D action-adventure platformer game. The game is set in present-day North America. The game opens at the main protagonist’s home. The protagonist is an artist named Auriel. The game itself exists in a dream world inside of Auriel’s head when she collapses at her desk from burnout and exhaustion. In a dream world, born of a distressed Artist’s mind, Auriel must face all her frustrations to find a way back out.
 
