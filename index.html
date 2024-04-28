@@ -6,148 +6,764 @@
 <body>
 
 <script>
+    let inks;
+    let Pages;
+    let score = 0;
+    let scoreText;
+    let context;
+
+    // Define StartingScene class
+    class StartingScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'StartingScene' });
+        }
+
+        preload() {
+            this.load.image('background', 'images/aur_web_start.png');
+        }
+
+        create() {
+            // Set background color
+            this.cameras.main.setBackgroundColor(0xFFAF85B4);
+
+            const backgroundImage = this.add.sprite(this.cameras.main.width / 2, this.cameras.main.height / 2, 'background');
+            backgroundImage.setOrigin(0.5); // Set origin to the center
+            backgroundImage.setDepth(1); // Set a higher depth for the original sprite
+
+            // Create a duplicate for the shadow effect
+            const shadowImage = this.add.sprite(backgroundImage.x + 15, backgroundImage.y + 15, 'background');
+            shadowImage.setOrigin(0.5); // Set origin to the center
+            shadowImage.setTint(0x000000); // Apply a black tint to create a shadow effect
+            shadowImage.setAlpha(0.5); // Adjust the alpha to control the intensity of the shadow
+            shadowImage.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+
+            // Display starting scene elements
+            this.add.text((this.cameras.main.width / 2) - 150, (this.cameras.main.height / 2) + 200, 'Choose an option', { fontSize: '32px', fill: '#fff' });
+
+            // Add play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 250, 'Play', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.startGame());
+
+            // Add exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 300, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.exitGame());
+        }
+
+        startGame() {
+            this.scene.start('IntroScene'); // Transition to main game scene
+        }
+
+        exitGame() {
+            // Attempt to close the browser window
+            window.close();
+            // If the browser prevents window closure
+            console.log("The browser prevented window closure. Please close the window manually.");
+        }
+    }
+
+    // Define IntroScene class
+    class IntroScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'IntroScene' });
+        }
+
+        preload() {
+            this.load.image('samplechar', 'images/thirdchar.png');
+        }
+
+        create() {
+            // Set background color
+            this.cameras.main.setBackgroundColor(0xFFAF85B4);
+
+            const charImage = this.add.sprite((this.cameras.main.width / 2) + 500, (this.cameras.main.height / 2), 'samplechar');
+            charImage.setOrigin(0.5);
+            charImage.setScale(2)
+            charImage.setDepth(1); // Set a higher depth for the original sprite
+
+            // Create a duplicate for the shadow effect
+            const shadowImage1 = this.add.sprite(charImage.x + 15, charImage.y + 15, 'samplechar');
+            shadowImage1.setOrigin(0.5); // Set origin to the center
+            shadowImage1.setTint(0x000000); // Apply a black tint to create a shadow effect
+            shadowImage1.setAlpha(0.5); // Adjust the alpha to control the intensity of the shadow
+            shadowImage1.setScale(2)
+            shadowImage1.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+
+            // Define the text for the intro scene
+            const introText = [
+                "Welcome to the game!",
+                "In this game, you are...",
+                "Your mission is to...",
+                "Be careful of...",
+                "Good luck!"
+            ];
+
+            // Display intro scene elements
+            const textConfig = { fontSize: '24px', fill: '#fff', align: 'center', fontFamily: 'Arial' };
+            this.textObject = this.add.text((this.cameras.main.width / 2), (this.cameras.main.height / 2), '', textConfig).setOrigin(0.5);
+
+            // Start displaying text with fade effect
+            this.displayTextWithFade(introText, 0, 500);
+        }
+
+        displayTextWithFade(textArray, index, delay) {
+            // Display text with fade effect
+            this.textObject.setText(textArray[index]);
+            this.textObject.setAlpha(0); // Start with transparency
+            this.tweens.add({
+                targets: this.textObject,
+                alpha: 1, // Fully visible
+                duration: 500, // Fade-in duration
+                delay: delay, // Delay before fading starts
+                onComplete: () => {
+                    // After fade-in, wait for a while then fade out
+                    this.time.delayedCall(1500, () => {
+                        this.tweens.add({
+                            targets: this.textObject,
+                            alpha: 0, // Fully transparent
+                            duration: 500, // Fade-out duration
+                            onComplete: () => {
+                                // Move to the next text or scene
+                                if (index + 1 < textArray.length) {
+                                    // Display next text
+                                    this.displayTextWithFade(textArray, index + 1, 1000);
+                                } else {
+                                    // Transition to the next scene (e.g., game scene)
+                                    this.scene.start('MyGame');
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        }
+    }
+
+    // Define WinScene class
+    class WinScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'WinScene' });
+        }
+
+        preload() {
+            this.load.atlas('vic', 'images/victoryWin.png', 'jsonFiles/victoryWin.json');
+        }
+
+        create() {
+            // Set background color
+            this.cameras.main.setBackgroundColor(0xFFAF85B4);
+
+            // Display lose scene elements
+            this.anims.create({
+                key: 'victoryAnimation',
+                frames: this.anims.generateFrameNames('vic', {
+                    prefix: 'victoryWin ',
+                    start: 0,
+                    end: 5,
+                    zeroPad: 1,
+                    suffix: '.aseprite'
+                }),
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            // Create shadow animation frames by mirroring the original animation frames
+            const shadowFrames = [];
+            const originalFrames = this.anims.get('victoryAnimation').frames;
+            for (let i = 0; i < originalFrames.length; i++) {
+                const frame = originalFrames[i];
+                const shadowFrame = { key: 'vic', frame: frame.textureFrame };
+                shadowFrames.push(shadowFrame);
+            }
+
+            // Create shadow animation
+            this.anims.create({
+                key: 'shadowAnimation',
+                frames: shadowFrames,
+                frameRate: 10,
+                repeat: -1
+            });
+
+            const vicChar = this.add.sprite((this.cameras.main.width / 2), (this.cameras.main.height / 2) + 130, 'vic');
+            vicChar.setScale(1.5)
+            vicChar.anims.play('victoryAnimation', true);
+
+            vicChar.setDepth(1); // Set a higher depth for the original sprite
+
+            // Create shadow sprites
+            const shadowSprites = [];
+            for (let i = 0; i < shadowFrames.length; i++) {
+                const frame = shadowFrames[i];
+                const shadow = this.add.sprite(vicChar.x + 15, vicChar.y + 15, frame.key, frame.frame);
+                shadow.setOrigin(0.5); // Set origin to the center
+                shadow.setTint(0x333333); // Apply a black tint to create a shadow effect
+                shadow.setAlpha(0.2); // Adjust the alpha to control the intensity of the shadow
+                shadow.setScale(1.5);
+                shadow.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+                shadowSprites.push(shadow);
+            }
+
+            // Play shadow animation on shadow sprites
+            shadowSprites.forEach(shadow => {
+                shadow.anims.play('shadowAnimation', true);
+            });
+            
+            // Display starting scene elements
+            this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 350, 'You Win!', { fontSize: '32px', fill: '#fff' });
+
+            // Add play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.startGame());
+
+            // Add exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.exitGame());
+        }
+
+        startGame() {
+            this.scene.start('MyGame'); // Transition to main game scene
+        }
+
+        exitGame() {
+            // Attempt to close the browser window
+            window.close();
+            // If the browser prevents window closure
+            console.log("The browser prevented window closure. Please close the window manually.");
+        }
+    }
+
+    // Define LoseScene class
+    class LoseScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'LoseScene' });
+        }
+
+        preload() {
+            this.load.atlas('sleep', 'images/AurielSleep.png', 'jsonFiles/AurielSleep.json');
+        }
+
+        create() {
+            // Set background color
+            this.cameras.main.setBackgroundColor(0xFFAF85B4);
+
+            // Display lose scene elements
+            this.anims.create({
+                key: 'sleepAnimation',
+                frames: [
+                    { key: 'sleep', frame: 'AurielSleep 0.aseprite' },
+                    { key: 'sleep', frame: 'AurielSleep 1.aseprite' },
+                    { key: 'sleep', frame: 'AurielSleep 2.aseprite' },
+                    { key: 'sleep', frame: 'AurielSleep 3.aseprite' },
+                    { key: 'sleep', frame: 'AurielSleep 4.aseprite' },
+                ],
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            // Create shadow animation frames by mirroring the original animation frames
+            const shadowFrames = [];
+            const originalFrames = this.anims.get('sleepAnimation').frames;
+            for (let i = 0; i < originalFrames.length; i++) {
+                const frame = originalFrames[i];
+                const shadowFrame = { key: 'sleep', frame: frame.textureFrame };
+                shadowFrames.push(shadowFrame);
+            }
+
+            // Create shadow animation
+            this.anims.create({
+                key: 'shadowAnimation',
+                frames: shadowFrames,
+                frameRate: 10,
+                repeat: -1
+            });
+
+            const sleepChar = this.add.sprite((this.cameras.main.width / 2), (this.cameras.main.height / 2) + 100, 'sleep');
+            sleepChar.setScale(2)
+            sleepChar.anims.play('sleepAnimation', true);
+            sleepChar.setDepth(1); // Set a higher depth for the original sprite
+
+            // Create shadow sprites
+            const shadowSprites = [];
+            for (let i = 0; i < shadowFrames.length; i++) {
+                const frame = shadowFrames[i];
+                const shadow = this.add.sprite(sleepChar.x + 15, sleepChar.y + 15, frame.key, frame.frame);
+                shadow.setOrigin(0.5); // Set origin to the center
+                shadow.setTint(0x333333); // Apply a black tint to create a shadow effect
+                shadow.setAlpha(0.2); // Adjust the alpha to control the intensity of the shadow
+                shadow.setScale(2);
+                shadow.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+                shadowSprites.push(shadow);
+            }
+
+            // Play shadow animation on shadow sprites
+            shadowSprites.forEach(shadow => {
+                shadow.anims.play('shadowAnimation', true);
+            });
+            
+            
+            // Display starting scene elements
+            this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 350, 'Game Over!', { fontSize: '32px', fill: '#fff' });
+
+            // Add play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.startGame());
+
+            // Add exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+                .setInteractive()
+                .on('pointerdown', () => this.exitGame());
+        }
+
+        startGame() {
+            this.scene.start('MyGame'); // Transition to main game scene
+        }
+
+        exitGame() {
+            // Attempt to close the browser window
+            window.close();
+            // If the browser prevents window closure
+            console.log("The browser prevented window closure. Please close the window manually.");
+        }
+    }
+
+    // Define a Phaser scene
+    class MyGame extends Phaser.Scene {
+        constructor() {
+            super({ key: 'MyGame' });
+            // Define variables
+            this.player;
+            this.cursors;
+            this.jumpKey;
+            this.map;
+            this.backgroundLayer;
+            this.mapLayer;
+            this.collectedPages = [];
+            this.pageObjects;
+            this.pagetally;
+            this.winCondition = false;
+            this.loseCondition = false;
+        }
+
+        preload() {
+            // Load the tilemap and its associated tileset images
+            this.load.image('cloudBack', 'images/cloudBack.png');
+            this.load.image('cloudBack2', 'images/cloudBack2.png');
+            this.load.image('cloudBack3', 'images/cloudBack3.png');
+            this.load.image('cloudLeft', 'images/cloudLeft.png');
+            this.load.image('cloudRight', 'images/cloudRight.png');
+            this.load.image('cloudInner', 'images/cloudInner.png');
+            this.load.image('cloudCenter', 'images/cloudCenter.png');
+            this.load.image('towerWall', 'images/towerWall.png');
+            this.load.image('towerwallback', 'images/towerWallBack.png');
+            this.load.image('aurback', 'images/aurielsBackground.png');
+            this.load.image('foreui', 'images/atrueback.png');
+
+            this.load.tilemapTiledJSON('map', 'jsonFiles/AurielsTileset.json');
+            this.load.atlas('aurielRun', 'images/aruielRun.png', 'jsonFiles/aruielRun.json');
+            this.load.atlas('aurielJump', 'images/aurielJump.png', 'jsonFiles/aurielJump.json');
+            this.load.atlas('aurielBob', 'images/aurielBob.png', 'jsonFiles/aurielBob.json');
+            this.load.atlas('paperPage', 'images/pages.png', 'jsonFiles/pages.json');
+            this.load.atlas('inkSploch', 'images/InkDrop.png', 'jsonFiles/InkDrop.json');
+            this.load.atlas('heart', 'images/aurielLife.png', 'jsonFiles/aurielLife.json');
+            this.load.atlas('win', 'images/aurielWin.png', 'jsonFiles/aurielWin.json');
+        }
+
+        create() {
+            // Create the background-image layer
+            const imageLayer = this.add.image(0, 0, 'aurback');
+            imageLayer.setOrigin(0, 0);
+
+            // Adjust the position of the image layer
+            const yOffset = -1000;
+            imageLayer.setPosition(0, yOffset);
+
+            // Load the tilemap
+            this.map = this.make.tilemap({ key: 'map' });
+            
+            // Add tileset images
+            const tileset1 = this.map.addTilesetImage('back1', 'cloudBack');
+            const tileset2 = this.map.addTilesetImage('back2', 'cloudBack2');
+            const tileset3 = this.map.addTilesetImage('back3', 'cloudBack3');
+            const tileset4 = this.map.addTilesetImage('left', 'cloudLeft');
+            const tileset5 = this.map.addTilesetImage('right', 'cloudRight');
+            const tileset6 = this.map.addTilesetImage('inner', 'cloudInner');
+            const tileset7 = this.map.addTilesetImage('center', 'cloudCenter');
+            const tileset8 = this.map.addTilesetImage('wall', 'towerWall');
+            const tileset9 = this.map.addTilesetImage('wallback', 'towerwallback');
+
+            // Create the background layer
+            this.backgroundLayer = this.map.createLayer('background', [tileset1, tileset2, tileset3, tileset4, tileset5, tileset6, tileset7, tileset8, tileset9], 0, 0);
+
+            // Create the map layer
+            this.mapLayer = this.map.createLayer('maplayer', [tileset1, tileset2, tileset3, tileset4, tileset5, tileset6, tileset7, tileset8, tileset9], 0, 0);
+
+            // Set collision for specific tiles (if needed)
+            this.mapLayer.setCollisionByProperty({ collides: true });
+
+            // Resize the world bounds to match the size of the map layer
+            this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+
+            // Add animated paper pages
+            const pageObjects = this.map.getObjectLayer('object_page');
+
+            this.anims.create({
+                key: 'paperPageAnimation',
+                frames: [
+                    { key: 'paperPage', frame: 'pages 0.aseprite' },
+                    { key: 'paperPage', frame: 'pages 1.aseprite' },
+                    { key: 'paperPage', frame: 'pages 2.aseprite' },
+                    { key: 'paperPage', frame: 'pages 3.aseprite' },
+                    { key: 'paperPage', frame: 'pages 4.aseprite' },
+                    { key: 'paperPage', frame: 'pages 5.aseprite' },
+                    { key: 'paperPage', frame: 'pages 6.aseprite' },
+                ],
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            this.anims.create({
+                key: 'inkAnimation',
+                frames: [
+                    { key: 'inkSploch', frame: 'InkDrop 0.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 1.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 2.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 3.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 4.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 5.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 6.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 7.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 8.aseprite' },
+                    { key: 'inkSploch', frame: 'InkDrop 9.aseprite' },
+                ],
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            this.anims.create({
+                key: 'heartAnimation',
+                frames: [
+                    { key: 'heart', frame: 'aurielLife 0.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 1.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 2.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 3.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 4.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 5.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 6.aseprite' },
+                    { key: 'heart', frame: 'aurielLife 7.aseprite' },
+                ],
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            this.anims.create({
+                key: 'winAnimation',
+                frames: [
+                    { key: 'win', frame: 'aurielWin 0.aseprite' },
+                    { key: 'win', frame: 'aurielWin 1.aseprite' },
+                    { key: 'win', frame: 'aurielWin 2.aseprite' },
+                    { key: 'win', frame: 'aurielWin 3.aseprite' },
+                    { key: 'win', frame: 'aurielWin 4.aseprite' },
+                    { key: 'win', frame: 'aurielWin 5.aseprite' },
+                    { key: 'win', frame: 'aurielWin 6.aseprite' },
+                    { key: 'win', frame: 'aurielWin 7.aseprite' },
+                ],
+                frameRate: 10, // Adjust as needed
+                repeat: -1 // Loop indefinitely
+            });
+
+            const winTrophy = this.physics.add.sprite(6180, 1120, 'win');
+            winTrophy.body.allowGravity = false;
+            winTrophy.anims.play('winAnimation', true);
+
+            // Create the foreground image layer
+            this.foregroundLayer = this.add.image(2100, 4000, 'foreui');
+            this.foregroundLayer.setOrigin(0, 0);
+
+            // Add character sprite
+            this.player = this.physics.add.sprite(2100, 4000, 'player');
+            //this.player = this.physics.add.sprite(6180, 1120, 'player');
+            this.player.setCollideWorldBounds(true);
+
+            this.player.setGravityY(500);
+
+            this.mapLayer.setCollisionBetween(1, 999, true, 'maplayer');
+
+
+            this.heartsGroup = this.add.group();
+            const heartSpacing = 32; // Adjust the spacing between hearts as needed
+            const numHearts = 10; // Number of hearts representing player health
+            for (let i = 0; i < numHearts; i++) {
+                const heart = this.heartsGroup.create(i * heartSpacing, 0, 'heart');
+                heart.anims.play('heartAnimation', true);
+                heart.setScale(1); // Adjust the scale of the heart sprite as needed
+            }
+
+            inks = this.physics.add.group();
+            Pages = this.physics.add.group();
+
+            //scoreText = this.add.text(2100, 4400, 'Score: 0', { fontSize: '32px', fill: '#000' });
+            this.physics.add.collider(this.player, inks, this.collectInk, null, this);
+            this.physics.add.collider(this.player, Pages, this.collectPage, null, this);
+            this.physics.add.collider(this.player, winTrophy, this.collectWin, null, this);
+
+            this.time.addEvent({
+                    delay: 500,
+                    callback: this.addNewInk,
+                    callbackScope: this,
+                    loop: true
+            });
+            this.time.addEvent({
+                    delay: 1000,
+                    callback: this.addNewPage,
+                    callbackScope: this,
+                    loop: true
+            });
+
+            // Create an array to keep track of collected pages
+            let collectedPages = [];
+
+            this.pagetally = this.physics.add.staticGroup()
+
+            // Define running animation
+            this.anims.create({
+                key: 'run',
+                frames: this.anims.generateFrameNames('aurielRun', {
+                    prefix: 'aruielRun ',
+                    start: 0,
+                    end: 3,
+                    zeroPad: 1,
+                    suffix: '.aseprite'
+                }),
+                frameRate: 10,
+                repeat: -1
+            });
+
+            // Define jump animation
+            this.anims.create({
+                key: 'jump',
+                frames: this.anims.generateFrameNames('aurielJump', {
+                    prefix: 'aurielJump ',
+                    start: 0,
+                    end: 2,
+                    zeroPad: 1,
+                    suffix: '.aseprite'
+                }),
+                frameRate: 10,
+                repeat: -1 // Loop indefinitely
+            });
+
+            // Define idle animation
+            this.anims.create({
+                key: 'idle',
+                frames: this.anims.generateFrameNames('aurielBob', {
+                    prefix: 'aurielBob ',
+                    start: 0,
+                    end: 1,
+                    zeroPad: 1,
+                    suffix: '.aseprite'
+                }),
+                frameRate: 5,
+                repeat: -1 // Loop indefinitely
+            });
+
+            // Set the size and offset of the player's physics body
+            this.player.setSize(24, 64); // Set the size to match the player's visible size
+            this.player.setOffset(16, 0); // Set the offset to adjust the collision bound
+
+            // Enable keyboard input
+            this.cursors = this.input.keyboard.addKeys({
+                left: Phaser.Input.Keyboard.KeyCodes.LEFT,
+                right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
+                a: Phaser.Input.Keyboard.KeyCodes.A,
+                d: Phaser.Input.Keyboard.KeyCodes.D
+            });
+
+            // Enable space key for jumping
+            this.jumpKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+
+            // Enable collisions between player and map layer
+            this.physics.add.collider(this.player, this.mapLayer);
+
+            // Enable collisions between player and terrain layer
+            const collision = this.physics.add.collider(this.player, this.mapLayer, function (player, tile) {
+                console.log("Collision detected with tile:", tile);
+            });
+
+            // Make the camera follow the player
+            this.cameras.main.startFollow(this.player);
+        }
+
+        addNewInk() {
+                const bound = Phaser.Math.Between(200, 7000);
+                const ink = inks.create(bound, 0, 'inkSploch').setScale(1);
+                ink.anims.play('inkAnimation', true);
+                ink.body.allowGravity = true;
+                ink.body.setGravityY(10);
+                ink.setVelocityY(0);
+            }
+        
+        addNewPage() {
+            const bound = Phaser.Math.Between(2000, 7000);
+            const page = Pages.create(bound, 0, 'paperPage').setScale(1);
+            page.anims.play('paperPageAnimation', true);
+            page.body.allowGravity = true;
+            page.body.setGravityY(10);
+            page.setVelocityY(0);
+        }
+
+        decreasePlayerHealth() {
+            // Get the first heart sprite in the hearts group
+            const heart = this.heartsGroup.getFirstAlive(true);
+
+            if (heart) {
+                // Remove the heart sprite from the group
+                this.heartsGroup.remove(heart, true, true);
+            }
+        }
+
+        collectInk(player, ink) {
+            // Deals with ink collection
+            if (ink.texture.key === 'inkSploch') {
+                //score -= 10; // Subtract points for collecting regular ink
+                //scoreText.setText('Score: ' + score);
+                this.decreasePlayerHealth();
+
+                //this.player.body.gravity.y = -400; // Temporarily set gravity to zero
+                this.player.body.gravity.x = -5000; // Temporarily set gravity to zero
+
+                // Restore the original gravity after a short delay
+                this.time.delayedCall(300, () => {
+                    //player.body.gravity.y = 500;
+                    player.body.gravity.x = 0;
+                });
+                
+            }
+            ink.destroy();
+
+            if (this.heartsGroup.getChildren().length <= 0) {
+                this.loseCondition = true
+            }
+        }
+
+        collectPage(player, page) {
+            // Increase player health up to a maximum of 29 hearts
+            if (this.heartsGroup.getChildren().length < 29) {
+                const heart = this.heartsGroup.create(0, 0, 'heart');
+                heart.anims.play('heartAnimation', true);
+                heart.setScale(1);
+            }
+            page.destroy();
+
+            if (this.heartsGroup.getChildren().length <= 0) {
+                this.loseCondition = true
+            }
+        }
+
+        collectWin(player, win) {
+            console.log('Win trophy collected!');
+            win.destroy();
+            this.winCondition = true;
+        }
+
+        update() {
+            //console.log('Player Position:', this.player.x, this.player.y);
+
+            // Check and destroy out-of-bounds inks
+            inks.getChildren().forEach(ink => {
+                if (ink.y > this.map.heightInPixels) {
+                    ink.destroy();
+                }
+            });
+
+            // Check and destroy out-of-bounds pages
+            Pages.getChildren().forEach(page => {
+                if (page.y > this.map.heightInPixels) {
+                    page.destroy();
+                }
+            });
+
+            // Check for lose conditions
+            if (this.heartsGroup.countActive() === 0 || this.player.y > 5700) {
+                this.scene.start('LoseScene'); // Transition to lose scene
+                return;
+            }
+
+            // Check for win condition
+            if (this.winCondition === true) {
+                this.scene.start('WinScene'); // Transition to win scene
+                return;
+            }
+
+            // Reset velocity
+            this.player.setVelocityX(0);
+
+            const offsetX = this.foregroundLayer.displayWidth / 2;
+            const offsetY = this.foregroundLayer.displayHeight / 2;
+            this.foregroundLayer.x = this.player.x - offsetX;
+            this.foregroundLayer.y = this.player.y - offsetY - 30;
+
+            // Get the center position of the player sprite
+            const playerCenterX = this.player.x + this.player.displayWidth / 2;
+            const playerCenterY = this.player.y + this.player.displayHeight / 2;
+
+            // Set the position of each individual heart in the hearts group
+            this.heartsGroup.children.each((heart, index) => {
+                const offsetX = (index - (this.heartsGroup.children.size / 2)) * 64; // Adjust the spacing between hearts
+                heart.x = playerCenterX + offsetX;
+                heart.y = playerCenterY + 365;
+            });
+
+
+            // Move character left
+            if (this.cursors.left.isDown || this.cursors.a.isDown) {
+                this.player.setVelocityX(-250);
+                this.player.flipX = true; // Flip character sprite
+            }
+            // Move character right
+            else if (this.cursors.right.isDown || this.cursors.d.isDown) {
+                this.player.setVelocityX(250);
+                this.player.flipX = false; // Unflip character sprite
+            }
+
+            // Play appropriate animation based on player's state
+            if ((this.cursors.left.isDown || this.cursors.a.isDown || this.cursors.right.isDown || this.cursors.d.isDown) &&
+                (this.player.body.onFloor() || this.player.body.touching.down)) {
+                    this.player.anims.play('run', true);
+            } else if (this.player.body.velocity.y !== 0) {
+                this.player.anims.play('jump', true);
+            } else {
+                this.player.anims.play('idle', true);
+            }
+
+            // Check if jump key is pressed and player is on the ground
+            if (Phaser.Input.Keyboard.JustDown(this.jumpKey) && (this.player.body.onFloor() || this.player.body.touching.down)) {
+                this.player.setVelocityY(-500); // Set vertical velocity to make the player jump
+            }
+        }
+    }
+
     // Define configuration object
     const config = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: 1900,
+        height: 950,
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 300 },
-                debug: false // Set to true for debugging physics
+                gravity: { y: 0 },
+                debug: true // Set to true for debugging physics
             }
         },
-        scene: {
-            preload: preload,
-            create: create,
-            update: update
-        }
+        scene: [StartingScene, IntroScene, MyGame, WinScene, LoseScene]
     };
 
     // Create Phaser game instance
     const game = new Phaser.Game(config);
-
-    let player;
-    let cursors;
-    let jumpKey;
-
-    // Preload function to load assets
-    function preload() {
-        this.load.image('terrain', 'images/terrainOne-export.png');
-        this.load.atlas('aurielRun', 'images/aruielRun.png', 'images/aruielRun.json');
-        this.load.atlas('aurielJump', 'images/aurielJump.png', 'images/aurielJump.json');
-        this.load.atlas('aurielBob', 'images/aurielBob.png', 'images/aurielBob.json');
-    }
-
-    // Create function to build the level and add character
-    function create() {
-        // Add terrain blocks
-        terrainGroup = this.physics.add.staticGroup(); // Create a group for terrain blocks
-        for (let i = -1; i < 6; i++) {
-            const terrainBlock = terrainGroup.create(i * 64, 600, 'terrain'); // Adjust Y position
-            terrainBlock.setOrigin(0, 1);
-            //terrainBlock.setScale(0.5);
-        }
-
-        // Add character sprite
-        player = this.physics.add.sprite(100, 350, 'player'); // Adjust Y position
-        player.setCollideWorldBounds(true);
-
-        // Define running animation
-        this.anims.create({
-            key: 'run',
-            frames: this.anims.generateFrameNames('aurielRun', {
-                prefix: 'aruielRun ',
-                start: 0,
-                end: 3,
-                zeroPad: 1,
-                suffix: '.aseprite'
-            }),
-            frameRate: 10,
-            repeat: -1
-        });
-
-        // Define jump animation
-        this.anims.create({
-            key: 'jump',
-            frames: this.anims.generateFrameNames('aurielJump', {
-                prefix: 'aurielJump ',
-                start: 0,
-                end: 2,
-                zeroPad: 1,
-                suffix: '.aseprite'
-            }),
-            frameRate: 10,
-            repeat: -1 // Loop indefinitely
-        });
-
-        // Define idle animation
-        this.anims.create({
-            key: 'idle',
-            frames: this.anims.generateFrameNames('aurielBob', {
-                prefix: 'aurielBob ',
-                start: 0,
-                end: 1,
-                zeroPad: 1,
-                suffix: '.aseprite'
-            }),
-            frameRate: 5,
-            repeat: -1 // Loop indefinitely
-        });
-
-        // Set the size and offset of the player's physics body
-        player.setSize(4, 94); // Set the size to match the player's visible size
-        player.setOffset(0, 0); // Set the offset to adjust the collision bounds if needed
-
-        // Enable keyboard input
-        cursors = this.input.keyboard.addKeys({
-            left: Phaser.Input.Keyboard.KeyCodes.LEFT,
-            right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
-            a: Phaser.Input.Keyboard.KeyCodes.A,
-            d: Phaser.Input.Keyboard.KeyCodes.D
-        });
-
-        // Enable space key for jumping
-        jumpKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-
-        // Enable collisions between player and terrain blocks
-        this.physics.add.collider(player, terrainGroup);
-    }
-
-    // Update function to handle character movement
-    function update() {
-        // Reset velocity
-        player.setVelocityX(0);
-
-        // Move character left
-        if (cursors.left.isDown || cursors.a.isDown) {
-            player.setVelocityX(-160);
-            player.flipX = true; // Flip character sprite
-        }
-        // Move character right
-        else if (cursors.right.isDown || cursors.d.isDown) {
-            player.setVelocityX(160);
-            player.flipX = false; // Unflip character sprite
-        }
-
-        // Play appropriate animation based on player's state
-        if ((cursors.left.isDown || cursors.a.isDown || cursors.right.isDown || cursors.d.isDown) &&
-            (player.body.onFloor() || player.body.touching.down)) {
-            player.anims.play('run', true);
-        } else if (player.body.velocity.y !== 0) {
-            player.anims.play('jump', true);
-        } else {
-            player.anims.play('idle', true);
-        }
-
-        // Check if jump key is pressed and player is on the ground
-        if (Phaser.Input.Keyboard.JustDown(jumpKey) && (player.body.onFloor() || player.body.touching.down)) {
-            player.setVelocityY(-400); // Set vertical velocity to make the player jump
-        }
-    }
 </script>
 
 </body>
 </html>
-

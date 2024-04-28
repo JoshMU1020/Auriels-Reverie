@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CrabFeeder</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+</head>
+<body>
+    <script>
+        class StarterScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'StarterScene' });
+            }
+        
+            preload() {
+                // Preload assets for start scene
+                this.load.image('startButton', 'assets/playbutton.png');
+            }
+        
+            create() {
+                // Set background color to light blue
+                this.cameras.main.setBackgroundColor('#add8e6');
+
+                const title = this.add.text(200, 15, 'WELCOME TO\nCRAB FEEDER!', {
+                    fontSize: '32px',
+                    fill: '#000',
+                    align: 'center', 
+                    fontWeight: 'bold'
+                });
+        
+                // Add a start button
+                const startButton = this.add.image(config.width / 2, config.height / 2, 'startButton').setInteractive();
+                startButton.on('pointerup', () => {
+                    // Switch to the main game scene when the button is clicked
+                    this.scene.start('GeneralScene');
+                });
+            }
+        }
+
+        let player;
+        let cursors;
+        let Shrimps;
+        let score = 0;
+        let scoreText;
+        let context;
+
+        class GeneralScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'GeneralScene' });
+            }
+
+            preload() {
+                this.load.image('player', 'assets/crabPlayer.png');
+                this.load.image('shrimp', 'assets/regularShrimp.png');
+            }
+
+            create() {
+                // Set background color to light blue
+                this.cameras.main.setBackgroundColor('#add8e6');
+
+                // Add sand-colored rectangle below the player
+                const sand = this.add.rectangle(config.width / 2, config.height - 25, config.width, 50, 0xe0cda9);
+                sand.setOrigin(0.5, 0.5);
+
+                player = this.physics.add.sprite(50, config.height - 50, 'player').setScale(0.5);
+                player.setGravityY(0); // Disable gravity for player
+                cursors = this.input.keyboard.createCursorKeys();
+                Shrimps = this.physics.add.group();
+
+                scoreText = this.add.text(16, 80, 'Score: 0', { fontSize: '32px', fill: '#000' });
+                context = this.add.text(16, 50, 'EAT ALL THE SHRIMP!', { fontSize: '32px', fill: '#000' });
+                const Htext = this.add.text(16, 16, 'Reach 100 pts for Hard Mode!', { fontSize: '28px', fill: '#000' });
+                this.physics.add.collider(player, Shrimps, this.collectShrimp, null, this);
+            
+                this.time.addEvent({
+                    delay: 2000,
+                    callback: this.addNewShrimp,
+                    callbackScope: this,
+                    loop: true
+                });
+            }
+            
+            update() {
+                // Deals with player movement
+                if (cursors.left.isDown && player.x > 50) {
+                    player.setVelocityX(-200);
+                } else if (cursors.right.isDown && player.x < config.width - player.displayWidth / 2) {
+                    player.setVelocityX(200);
+                } else {
+                    player.setVelocityX(0);
+                }
+            }
+
+            addNewShrimp() {
+                const bound = Phaser.Math.Between(50, config.width - 20);
+                const shrimp = Shrimps.create(bound, 0, 'shrimp').setScale(0.5);
+                shrimp.setVelocityY(100);
+            }
+
+            collectShrimp(player, shrimp) {
+                shrimp.destroy();
+                score += 10;
+                scoreText.setText('Score: ' + score);
+                player.body.setVelocityY(0); // Player's velocity should stay at zero for y axis
+                if (score >= 100){
+                    this.scene.start('HardScene');
+                }
+            }
+        }
+
+        class HardScene extends Phaser.Scene {
+            constructor() {
+                super({ key: 'HardScene' });
+            }
+        
+            preload() {
+                // Preload assets for harder game scene
+                this.load.image('player', 'assets/crab.webp');
+                this.load.image('RegularShrimp', 'assets/regularShrimp.png');
+                this.load.image('InfectedShrimp', 'assets/infectedShrimp.png');
+            }
+        
+            create() {
+                // Set background color to a different color
+                this.cameras.main.setBackgroundColor('#add8e6');
+
+                // Add sand-colored rectangle below the player
+                const sand = this.add.rectangle(config.width / 2, config.height - 25, config.width, 50, 0xe0cda9);
+                sand.setOrigin(0.5, 0.5);
+
+                // Initialize player, Shrimps, and score
+                player = this.physics.add.sprite(50, config.height - 50, 'player').setScale(0.5);
+                player.setGravityY(0); // Disable gravity for player
+                cursors = this.input.keyboard.createCursorKeys();
+                Shrimps = this.physics.add.group();
+                score = 100; // Make sure the player starts hard mode with 100 points
+                scoreText = this.add.text(16, 50, 'Score: ' + score, { fontSize: '32px', fill: '#000' });
+                context = this.add.text(16, 16, "DON'T EAT THE INFECTED SHRIMP!", { fontSize: '32px', fill: '#000' });
+
+                // Set up shrimp generation
+                this.time.addEvent({
+                    delay: 1500,
+                    callback: this.addNewShrimp,
+                    callbackScope: this,
+                    loop: true
+                });
+                // Set up collision detection
+                this.physics.add.collider(player, Shrimps, this.collectShrimp, null, this);
+            }
+        
+            update() {
+                // Handles player movement
+                if (cursors.left.isDown && player.x > 50) {
+                    player.setVelocityX(-200);
+                } else if (cursors.right.isDown && player.x < config.width - player.displayWidth / 2) {
+                    player.setVelocityX(200);
+                } else {
+                    player.setVelocityX(0);
+                }
+                // Check if the score drops below zero
+                if (score <= 0) {
+                    score = 0;
+                    scoreText.setText('Score: ' + score);
+                    context.setText('Game Over!');
+                    player.destroy(); // Remove the player from the game if score drops below zero
+                }
+            }
+        
+            addNewShrimp() {
+                // Spawn new Shrimps (regular or infected shrimp)
+                const bound = Phaser.Math.Between(50, config.width - 20);
+                const ShrimpType = Math.random() < 0.6 ? 'RegularShrimp' : 'InfectedShrimp'; // 60% chance for regular shrimp, 40% chance for infected shrimp
+                const shrimp = Shrimps.create(bound, 0, ShrimpType).setScale(0.5);
+                shrimp.setVelocityY(200);
+            }
+        
+            collectShrimp(player, shrimp) {
+                // Deals with shrimp collection
+                if (shrimp.texture.key === 'RegularShrimp') {
+                    score += 10; // Add points for collecting regular shrimp
+                } else if (shrimp.texture.key === 'InfectedShrimp') {
+                    score -= 50; // Minus points for collecting infected shrimp
+                }
+        
+                scoreText.setText('Score: ' + score);
+                player.body.setVelocityY(0); // Player's velocity should stay at zero for y axis
+                shrimp.destroy();
+            }
+        }
+        
+
+        // Config of the game
+        const config = {
+            type: Phaser.AUTO,
+            width: 600,
+            height: 400,
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    gravity: { y: 0 },
+                    debug: false
+                }
+            },
+            scene: [StarterScene, GeneralScene, HardScene]
+        };
+
+        const game = new Phaser.Game(config);
+                
+    </script>
+</body>
+</html>
