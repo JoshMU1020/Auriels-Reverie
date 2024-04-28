@@ -33,20 +33,20 @@
             // Create a duplicate for the shadow effect
             const shadowImage = this.add.sprite(backgroundImage.x + 15, backgroundImage.y + 15, 'background');
             shadowImage.setOrigin(0.5); // Set origin to the center
-            shadowImage.setTint(0x000000); // Apply a black tint to create a shadow effect
-            shadowImage.setAlpha(0.5); // Adjust the alpha to control the intensity of the shadow
-            shadowImage.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+            shadowImage.setTint(0x000000); // Tint the shadow
+            shadowImage.setAlpha(0.5); // Adjust  intensity shadow
+            shadowImage.setDepth(0); // Set a lower depth than the original sprite
 
             // Display starting scene elements
-            this.add.text((this.cameras.main.width / 2) - 150, (this.cameras.main.height / 2) + 200, 'Choose an option', { fontSize: '32px', fill: '#fff' });
+            this.add.text((this.cameras.main.width / 2) - 150, (this.cameras.main.height / 2) + 200, 'Choose an option', { fontSize: '32px', fill: '#fff', fontWeight: 'bold' });
 
-            // Add play button
-            const playButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 250, 'Play', { fontSize: '24px', fill: '#fff' })
+            // Adding play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 250, 'Play', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.startGame());
 
-            // Add exit button
-            const exitButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 300, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+            // Adding exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 300, 'Exit - Close Window', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.exitGame());
         }
@@ -85,22 +85,23 @@
             // Create a duplicate for the shadow effect
             const shadowImage1 = this.add.sprite(charImage.x + 15, charImage.y + 15, 'samplechar');
             shadowImage1.setOrigin(0.5); // Set origin to the center
-            shadowImage1.setTint(0x000000); // Apply a black tint to create a shadow effect
-            shadowImage1.setAlpha(0.5); // Adjust the alpha to control the intensity of the shadow
+            shadowImage1.setTint(0x000000); // Tint the shadow
+            shadowImage1.setAlpha(0.5); // Adjust  intensity shadow
             shadowImage1.setScale(2)
-            shadowImage1.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+            shadowImage1.setDepth(0); // Set a lower depth than the original sprite
 
             // Define the text for the intro scene
             const introText = [
-                "Welcome to the game!",
-                "In this game, you are...",
-                "Your mission is to...",
-                "Be careful of...",
+                "Welcome to Auriel's Reverie!",
+                "In this game, you play as Auriel...\n a painter with an avid imagination.",
+                "Your mission is to reach the top of her mind palace\n and locate the trophy up in the clouds!",
+                "Be careful of falling ink sploches\n as they will make you lose health!",
+                "Feel free to grab onto any falling pages\n as they allow you to re-draw your health!",
                 "Good luck!"
             ];
 
             // Display intro scene elements
-            const textConfig = { fontSize: '24px', fill: '#fff', align: 'center', fontFamily: 'Arial' };
+            const textConfig = { fontSize: '24px', fill: '#fff', align: 'center', fontFamily: 'Arial', fontWeight: 'bold' };
             this.textObject = this.add.text((this.cameras.main.width / 2), (this.cameras.main.height / 2), '', textConfig).setOrigin(0.5);
 
             // Start displaying text with fade effect
@@ -117,8 +118,8 @@
                 duration: 500, // Fade-in duration
                 delay: delay, // Delay before fading starts
                 onComplete: () => {
-                    // After fade-in, wait for a while then fade out
-                    this.time.delayedCall(1500, () => {
+                    // Display test for some time before fading out
+                    this.time.delayedCall(2000, () => {
                         this.tweens.add({
                             targets: this.textObject,
                             alpha: 0, // Fully transparent
@@ -129,7 +130,7 @@
                                     // Display next text
                                     this.displayTextWithFade(textArray, index + 1, 1000);
                                 } else {
-                                    // Transition to the next scene (e.g., game scene)
+                                    // Transition to the main game scene
                                     this.scene.start('MyGame');
                                 }
                             }
@@ -164,7 +165,7 @@
                     zeroPad: 1,
                     suffix: '.aseprite'
                 }),
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -197,10 +198,10 @@
                 const frame = shadowFrames[i];
                 const shadow = this.add.sprite(vicChar.x + 15, vicChar.y + 15, frame.key, frame.frame);
                 shadow.setOrigin(0.5); // Set origin to the center
-                shadow.setTint(0x333333); // Apply a black tint to create a shadow effect
-                shadow.setAlpha(0.2); // Adjust the alpha to control the intensity of the shadow
+                shadow.setTint(0x333333); // Tint the shadow
+                shadow.setAlpha(0.2); // Adjust  intensity shadow
                 shadow.setScale(1.5);
-                shadow.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+                shadow.setDepth(0); // Set a lower depth than the original sprite
                 shadowSprites.push(shadow);
             }
 
@@ -210,15 +211,15 @@
             });
             
             // Display starting scene elements
-            this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 350, 'You Win!', { fontSize: '32px', fill: '#fff' });
+            this.add.text((this.cameras.main.width / 2) - 110, (this.cameras.main.height / 2) - 350, 'You Win!', { fontSize: '32px', fill: '#fff' });
 
-            // Add play button
-            const playButton = this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff' })
+            // Adding play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 110, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.startGame());
 
-            // Add exit button
-            const exitButton = this.add.text((this.cameras.main.width / 2) - 100, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+            // Adding exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 110, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.exitGame());
         }
@@ -259,7 +260,7 @@
                     { key: 'sleep', frame: 'AurielSleep 3.aseprite' },
                     { key: 'sleep', frame: 'AurielSleep 4.aseprite' },
                 ],
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -291,10 +292,10 @@
                 const frame = shadowFrames[i];
                 const shadow = this.add.sprite(sleepChar.x + 15, sleepChar.y + 15, frame.key, frame.frame);
                 shadow.setOrigin(0.5); // Set origin to the center
-                shadow.setTint(0x333333); // Apply a black tint to create a shadow effect
-                shadow.setAlpha(0.2); // Adjust the alpha to control the intensity of the shadow
+                shadow.setTint(0x333333); // Tint the shadow
+                shadow.setAlpha(0.2); // Adjust  intensity shadow
                 shadow.setScale(2);
-                shadow.setDepth(0); // Set a lower depth for the shadow sprite to ensure it appears behind the original sprite
+                shadow.setDepth(0); // Set a lower depth than the original sprite
                 shadowSprites.push(shadow);
             }
 
@@ -303,17 +304,16 @@
                 shadow.anims.play('shadowAnimation', true);
             });
             
-            
             // Display starting scene elements
             this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 350, 'Game Over!', { fontSize: '32px', fill: '#fff' });
 
-            // Add play button
-            const playButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff' })
+            // Adding play button
+            const playButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 300, 'Replay', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.startGame());
 
-            // Add exit button
-            const exitButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff' })
+            // Adding exit button
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 60, (this.cameras.main.height / 2) - 250, 'Exit - Close Window', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
                 .setInteractive()
                 .on('pointerdown', () => this.exitGame());
         }
@@ -330,7 +330,7 @@
         }
     }
 
-    // Define a Phaser scene
+    // Define a Phaser scene for the main game
     class MyGame extends Phaser.Scene {
         constructor() {
             super({ key: 'MyGame' });
@@ -341,7 +341,6 @@
             this.map;
             this.backgroundLayer;
             this.mapLayer;
-            this.collectedPages = [];
             this.pageObjects;
             this.pagetally;
             this.winCondition = false;
@@ -349,7 +348,7 @@
         }
 
         preload() {
-            // Load the tilemap and its associated tileset images
+            // Load images
             this.load.image('cloudBack', 'images/cloudBack.png');
             this.load.image('cloudBack2', 'images/cloudBack2.png');
             this.load.image('cloudBack3', 'images/cloudBack3.png');
@@ -361,7 +360,7 @@
             this.load.image('towerwallback', 'images/towerWallBack.png');
             this.load.image('aurback', 'images/aurielsBackground.png');
             this.load.image('foreui', 'images/atrueback.png');
-
+            // Load JSON atlas' and tilemap 
             this.load.tilemapTiledJSON('map', 'jsonFiles/AurielsTileset.json');
             this.load.atlas('aurielRun', 'images/aruielRun.png', 'jsonFiles/aruielRun.json');
             this.load.atlas('aurielJump', 'images/aurielJump.png', 'jsonFiles/aurielJump.json');
@@ -384,7 +383,7 @@
             // Load the tilemap
             this.map = this.make.tilemap({ key: 'map' });
             
-            // Add tileset images
+            // Adding tileset images
             const tileset1 = this.map.addTilesetImage('back1', 'cloudBack');
             const tileset2 = this.map.addTilesetImage('back2', 'cloudBack2');
             const tileset3 = this.map.addTilesetImage('back3', 'cloudBack3');
@@ -401,13 +400,13 @@
             // Create the map layer
             this.mapLayer = this.map.createLayer('maplayer', [tileset1, tileset2, tileset3, tileset4, tileset5, tileset6, tileset7, tileset8, tileset9], 0, 0);
 
-            // Set collision for specific tiles (if needed)
+            // Set collision for specific tiles
             this.mapLayer.setCollisionByProperty({ collides: true });
 
             // Resize the world bounds to match the size of the map layer
             this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
 
-            // Add animated paper pages
+            // Adding animated paper pages
             const pageObjects = this.map.getObjectLayer('object_page');
 
             this.anims.create({
@@ -421,7 +420,7 @@
                     { key: 'paperPage', frame: 'pages 5.aseprite' },
                     { key: 'paperPage', frame: 'pages 6.aseprite' },
                 ],
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -439,7 +438,7 @@
                     { key: 'inkSploch', frame: 'InkDrop 8.aseprite' },
                     { key: 'inkSploch', frame: 'InkDrop 9.aseprite' },
                 ],
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -455,7 +454,7 @@
                     { key: 'heart', frame: 'aurielLife 6.aseprite' },
                     { key: 'heart', frame: 'aurielLife 7.aseprite' },
                 ],
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -471,7 +470,7 @@
                     { key: 'win', frame: 'aurielWin 6.aseprite' },
                     { key: 'win', frame: 'aurielWin 7.aseprite' },
                 ],
-                frameRate: 10, // Adjust as needed
+                frameRate: 10, // set frame rate of animation
                 repeat: -1 // Loop indefinitely
             });
 
@@ -483,25 +482,24 @@
             this.foregroundLayer = this.add.image(2100, 4000, 'foreui');
             this.foregroundLayer.setOrigin(0, 0);
 
-            // Add character sprite
+            // Adding character sprite
             this.player = this.physics.add.sprite(2100, 4000, 'player');
             //this.player = this.physics.add.sprite(6180, 1120, 'player');
             this.player.setCollideWorldBounds(true);
-
             this.player.setGravityY(500);
-
             this.mapLayer.setCollisionBetween(1, 999, true, 'maplayer');
 
-
+            // Add hearts to player bar
             this.heartsGroup = this.add.group();
-            const heartSpacing = 32; // Adjust the spacing between hearts as needed
-            const numHearts = 10; // Number of hearts representing player health
+            const heartSpacing = 32; // Spacing between hearts
+            const numHearts = 3; // Number of hearts representing player health
             for (let i = 0; i < numHearts; i++) {
                 const heart = this.heartsGroup.create(i * heartSpacing, 0, 'heart');
                 heart.anims.play('heartAnimation', true);
-                heart.setScale(1); // Adjust the scale of the heart sprite as needed
+                heart.setScale(1.2);
             }
 
+            // Define groups to hold collectable items
             inks = this.physics.add.group();
             Pages = this.physics.add.group();
 
@@ -510,21 +508,19 @@
             this.physics.add.collider(this.player, Pages, this.collectPage, null, this);
             this.physics.add.collider(this.player, winTrophy, this.collectWin, null, this);
 
+            // Add item spawing loops
             this.time.addEvent({
-                    delay: 500,
+                    delay: 300,
                     callback: this.addNewInk,
                     callbackScope: this,
                     loop: true
             });
             this.time.addEvent({
-                    delay: 1000,
+                    delay: 2000,
                     callback: this.addNewPage,
                     callbackScope: this,
                     loop: true
             });
-
-            // Create an array to keep track of collected pages
-            let collectedPages = [];
 
             this.pagetally = this.physics.add.staticGroup()
 
@@ -656,6 +652,7 @@
                 heart.anims.play('heartAnimation', true);
                 heart.setScale(1);
             }
+            this.player.body.gravity.x = -50; // Temporarily set gravity to zero
             page.destroy();
 
             if (this.heartsGroup.getChildren().length <= 0) {
@@ -701,6 +698,7 @@
             // Reset velocity
             this.player.setVelocityX(0);
 
+            // Set position of player bar
             const offsetX = this.foregroundLayer.displayWidth / 2;
             const offsetY = this.foregroundLayer.displayHeight / 2;
             this.foregroundLayer.x = this.player.x - offsetX;
@@ -755,7 +753,7 @@
             default: 'arcade',
             arcade: {
                 gravity: { y: 0 },
-                debug: true // Set to true for debugging physics
+                debug: false 
             }
         },
         scene: [StartingScene, IntroScene, MyGame, WinScene, LoseScene]
