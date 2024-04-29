@@ -20,9 +20,16 @@
 
         preload() {
             this.load.image('background', 'images/aur_web_start.png');
+            this.load.audio('bgm', 'soundFiles/bgm.mp3');
         }
 
         create() {
+
+            // Background music
+            this.bgm = this.sound.add('bgm');
+            this.bgm.setVolume(0.3);
+            this.bgm.play({ loop: true });
+
             // Set background color
             this.cameras.main.setBackgroundColor(0xFFAF85B4);
 
@@ -38,7 +45,7 @@
             shadowImage.setDepth(0); // Set a lower depth than the original sprite
 
             // Display starting scene elements
-            this.add.text((this.cameras.main.width / 2) - 150, (this.cameras.main.height / 2) + 200, 'Choose an option', { fontSize: '32px', fill: '#fff', fontWeight: 'bold' });
+            this.add.text((this.cameras.main.width / 2) - 250, (this.cameras.main.height / 2) + 200, "Welcome To Auriel's Reverie", { fontSize: '32px', fill: '#fff', fontWeight: 'bold' });
 
             // Adding play button
             const playButton = this.add.text((this.cameras.main.width / 2) - 128, (this.cameras.main.height / 2) + 250, 'Play', { fontSize: '24px', fill: '#fff', fontWeight: 'bold' })
@@ -74,6 +81,7 @@
         }
 
         create() {
+
             // Set background color
             this.cameras.main.setBackgroundColor(0xFFAF85B4);
 
@@ -115,15 +123,15 @@
             this.tweens.add({
                 targets: this.textObject,
                 alpha: 1, // Fully visible
-                duration: 500, // Fade-in duration
+                duration: 400, // Fade-in duration
                 delay: delay, // Delay before fading starts
                 onComplete: () => {
                     // Display test for some time before fading out
-                    this.time.delayedCall(2000, () => {
+                    this.time.delayedCall(2200, () => {
                         this.tweens.add({
                             targets: this.textObject,
                             alpha: 0, // Fully transparent
-                            duration: 500, // Fade-out duration
+                            duration: 400, // Fade-out duration
                             onComplete: () => {
                                 // Move to the next text or scene
                                 if (index + 1 < textArray.length) {
@@ -152,6 +160,7 @@
         }
 
         create() {
+            
             // Set background color
             this.cameras.main.setBackgroundColor(0xFFAF85B4);
 
@@ -225,6 +234,12 @@
         }
 
         startGame() {
+            this.anims.remove('victoryAnimation');
+            this.anims.remove('shadowAnimation');
+            const sceneA = this.scene.get('MyGame');
+            if (sceneA) {
+                sceneA.winCondition = false;
+            }
             this.scene.start('MyGame'); // Transition to main game scene
         }
 
@@ -247,6 +262,7 @@
         }
 
         create() {
+
             // Set background color
             this.cameras.main.setBackgroundColor(0xFFAF85B4);
 
@@ -319,6 +335,8 @@
         }
 
         startGame() {
+            this.anims.remove('sleepAnimation');
+            this.anims.remove('shadowAnimation');
             this.scene.start('MyGame'); // Transition to main game scene
         }
 
@@ -360,6 +378,7 @@
             this.load.image('towerwallback', 'images/towerWallBack.png');
             this.load.image('aurback', 'images/aurielsBackground.png');
             this.load.image('foreui', 'images/atrueback.png');
+
             // Load JSON atlas' and tilemap 
             this.load.tilemapTiledJSON('map', 'jsonFiles/AurielsTileset.json');
             this.load.atlas('aurielRun', 'images/aruielRun.png', 'jsonFiles/aruielRun.json');
@@ -369,9 +388,27 @@
             this.load.atlas('inkSploch', 'images/InkDrop.png', 'jsonFiles/InkDrop.json');
             this.load.atlas('heart', 'images/aurielLife.png', 'jsonFiles/aurielLife.json');
             this.load.atlas('win', 'images/aurielWin.png', 'jsonFiles/aurielWin.json');
+
+            // Load audio files
+            this.load.audio('bgm', 'soundFiles/bgm.mp3');
+            this.load.audio('drip', 'soundFiles/drip.wav');
+            this.load.audio('jump', 'soundFiles/jump.wav');
+            this.load.audio('paper', 'soundFiles/paper.wav');
+            this.load.audio('win', 'soundFiles/win.mp3');
+            this.load.audio('lose', 'soundFiles/Retro_No hope.wav');
         }
 
         create() {
+            // Add event listener for the Escape key
+            this.input.keyboard.on('keydown-ESC', this.toggleMenu, this);
+
+            this.dripSound = this.sound.add('drip');
+            this.jumpSound = this.sound.add('jump');
+            this.jumpSound.setVolume(this.jumpSound.volume * 2);
+            this.paperSound = this.sound.add('paper');
+            this.winSound = this.sound.add('win');
+            this.loseSound = this.sound.add('lose');
+
             // Create the background-image layer
             const imageLayer = this.add.image(0, 0, 'aurback');
             imageLayer.setOrigin(0, 0);
@@ -479,12 +516,12 @@
             winTrophy.anims.play('winAnimation', true);
 
             // Create the foreground image layer
-            this.foregroundLayer = this.add.image(2100, 4000, 'foreui');
+            this.foregroundLayer = this.add.image(1500, 4250, 'foreui');
             this.foregroundLayer.setOrigin(0, 0);
 
             // Adding character sprite
-            this.player = this.physics.add.sprite(2100, 4000, 'player');
-            //this.player = this.physics.add.sprite(6180, 1120, 'player');
+            this.player = this.physics.add.sprite(1350, 4250, 'player');
+            //this.player = this.physics.add.sprite(6100, 1120, 'player');
             this.player.setCollideWorldBounds(true);
             this.player.setGravityY(500);
             this.mapLayer.setCollisionBetween(1, 999, true, 'maplayer');
@@ -503,7 +540,6 @@
             inks = this.physics.add.group();
             Pages = this.physics.add.group();
 
-            //scoreText = this.add.text(2100, 4400, 'Score: 0', { fontSize: '32px', fill: '#000' });
             this.physics.add.collider(this.player, inks, this.collectInk, null, this);
             this.physics.add.collider(this.player, Pages, this.collectPage, null, this);
             this.physics.add.collider(this.player, winTrophy, this.collectWin, null, this);
@@ -593,6 +629,14 @@
             this.cameras.main.startFollow(this.player);
         }
 
+        toggleMenu() {
+            // Pause the game
+            this.scene.pause();
+            
+            // Display your menu scene
+            this.scene.launch('MenuScene');
+        }
+
         addNewInk() {
                 const bound = Phaser.Math.Between(200, 7000);
                 const ink = inks.create(bound, 0, 'inkSploch').setScale(1);
@@ -623,6 +667,7 @@
 
         collectInk(player, ink) {
             // Deals with ink collection
+            this.dripSound.play();
             if (ink.texture.key === 'inkSploch') {
                 //score -= 10; // Subtract points for collecting regular ink
                 //scoreText.setText('Score: ' + score);
@@ -639,18 +684,19 @@
                 
             }
             ink.destroy();
-
             if (this.heartsGroup.getChildren().length <= 0) {
                 this.loseCondition = true
             }
         }
 
         collectPage(player, page) {
+            // Deals with page collection
+            this.paperSound.play();
             // Increase player health up to a maximum of 29 hearts
             if (this.heartsGroup.getChildren().length < 29) {
                 const heart = this.heartsGroup.create(0, 0, 'heart');
                 heart.anims.play('heartAnimation', true);
-                heart.setScale(1);
+                heart.setScale(1.2);
             }
             this.player.body.gravity.x = -50; // Temporarily set gravity to zero
             page.destroy();
@@ -661,6 +707,7 @@
         }
 
         collectWin(player, win) {
+            this.winSound.play();
             console.log('Win trophy collected!');
             win.destroy();
             this.winCondition = true;
@@ -686,12 +733,21 @@
             // Check for lose conditions
             if (this.heartsGroup.countActive() === 0 || this.player.y > 5700) {
                 this.scene.start('LoseScene'); // Transition to lose scene
+                const sceneA = this.scene.get('StartingScene');
+                if (sceneA && sceneA.bgm) {
+                    sceneA.bgm.stop();
+                }
+                this.loseSound.play();
+                const duration = 4900;
+                setTimeout(() => {
+                    this.loseSound.stop();
+                }, duration);
                 return;
             }
 
             // Check for win condition
             if (this.winCondition === true) {
-                this.scene.start('WinScene'); // Transition to win scene
+                this.scene.start('WinScene');
                 return;
             }
 
@@ -740,9 +796,68 @@
             // Check if jump key is pressed and player is on the ground
             if (Phaser.Input.Keyboard.JustDown(this.jumpKey) && (this.player.body.onFloor() || this.player.body.touching.down)) {
                 this.player.setVelocityY(-500); // Set vertical velocity to make the player jump
+                this.jumpSound.play();
             }
         }
     }
+
+    // Define MenuScene class
+    class MenuScene extends Phaser.Scene {
+        constructor() {
+            super({ key: 'MenuScene' });
+        }
+
+        create() {
+            // Background box
+            const backgroundBox = this.add.graphics();
+            backgroundBox.fillStyle(0x000000, 0.7); // Dark semi-transparent color
+            backgroundBox.fillRect((this.cameras.main.width / 2) - 200, (this.cameras.main.height / 2) - 200, 400, 210); // Position and size of the box
+
+            // Title
+            const titleText = this.add.text((this.cameras.main.width / 2) - 0, (this.cameras.main.height / 2) - 150, 'Pause Menu', { fontSize: '32px', fill: '#ffffff', fontWeight: 'bold' });
+            titleText.setOrigin(0.5); // Center the text horizontally
+
+            // Display menu elements
+            const restartButton = this.add.text((this.cameras.main.width / 2) - 0, (this.cameras.main.height / 2) - 100, 'Restart', { fontSize: '24px', fill: '#ffffff', fontWeight: 'bold' })
+                .setOrigin(0.5) // Center the button horizontally
+                .setInteractive()
+                .on('pointerdown', () => this.restartGame());
+
+            const exitButton = this.add.text((this.cameras.main.width / 2) - 0, (this.cameras.main.height / 2) - 50, 'Exit - Close Window', { fontSize: '24px', fill: '#ffffff', fontWeight: 'bold' })
+                .setOrigin(0.5) // Center the button horizontally
+                .setInteractive()
+                .on('pointerdown', () => this.exitGame());
+
+            // Add event listener for the Escape key to resume the game
+            this.input.keyboard.on('keydown-ESC', this.resumeGame, this);
+        }
+
+        restartGame() {
+            // Restart the game scene
+            this.scene.stop('MenuScene');
+            const gameScene = this.scene.get('MyGame');
+            if (gameScene) {
+                gameScene.scene.restart();
+            }
+        }
+
+        exitGame() {
+            // Attempt to close the browser window
+            window.close();
+            // If the browser prevents window closure
+            console.log("The browser prevented window closure. Please close the window manually.");
+        }
+
+        resumeGame() {
+            // Resume the game
+            const gameScene = this.scene.get('MyGame');
+            if (gameScene && gameScene.scene.isPaused()) {
+                gameScene.scene.resume();
+                this.scene.stop();
+            }
+        }
+    }
+
 
     // Define configuration object
     const config = {
@@ -756,7 +871,7 @@
                 debug: false 
             }
         },
-        scene: [StartingScene, IntroScene, MyGame, WinScene, LoseScene]
+        scene: [StartingScene, IntroScene, MyGame, WinScene, LoseScene, MenuScene]
     };
 
     // Create Phaser game instance
