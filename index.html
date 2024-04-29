@@ -734,9 +734,7 @@
             if (this.heartsGroup.countActive() === 0 || this.player.y > 5700) {
                 this.scene.start('LoseScene'); // Transition to lose scene
                 const sceneA = this.scene.get('StartingScene');
-                if (sceneA && sceneA.bgm) {
-                    sceneA.bgm.stop();
-                }
+                
                 this.loseSound.play();
                 const duration = 4900;
                 setTimeout(() => {
